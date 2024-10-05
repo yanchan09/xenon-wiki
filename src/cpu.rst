@@ -102,18 +102,27 @@ SOC MMIO Registers
 | 0x020000061000+0x188 | u64   |               | Controls clock        |
 |                      |       |               | divisor & VID         |
 +----------------------+-------+---------------+-----------------------+
-| 0x020000061000+0x1a0 | u64   | TB_CLK_PERIOD | CBB writes            |
+| 0x020000061000+0x1a0 | u64   | TBR           | CBB writes            |
 +----------------------+-------+---------------+-----------------------+
 
-TB_CLK_PERIOD
+TBR
 -------------
 
-Controls the rate at which the BookE Time Base (TBU / TBL) gets incremented:
+Controls the rate at which the BookE time-base (TBU / TBL) gets incremented:
 
 * 0 stops the timer
 * CBB/XeLL writes 0x1ff to start the timer
 
-Note that the Time Base is stored per-thread, so XeLL syncs the timebases of the threads.
+Note that the time-base is counted per-thread, so XeLL LV2 syncs the time-bases of all threads:
+
+* Stop time-base timer (TBR <- 0)
+* Catch all threads. In all threads, execute:
+
+  * TBLW <- 0
+  * TBUW <- 0
+  * TBLW <- 0 (TODO: why repeat TBLW write?)
+
+* Restart the time-base timer (TBR <- 0x0ff)
 
 Potentially same as CellBE TBR register, thus:
 
